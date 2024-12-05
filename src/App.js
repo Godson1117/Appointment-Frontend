@@ -1,23 +1,41 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
-const domain="https://appointment-backend-weld.vercel.app"
+    const domain="https://appointment-backend-weld.vercel.app"
+    // const domain = "http://localhost:5000";
 
     const [phone, setPhone] = useState('');
     const [data, setData] = useState(null);
     const [form, setForm] = useState({ name: '', date: '', time: '', service: '', specialRequests: '' });
     const [action, setAction] = useState('');
 
+
     const checkAppointment = async () => {
         try {
             const response = await axios.get(`${domain}/appointments/${phone}`);
             setData(response.data);
-            setAction(response.data.exists ? 'updateOrDelete' : 'create');
+            if (response.data.exists) {
+                if (response.data.pastAppointment) {
+                    // If the appointment has passed, show an alert and set the action to 'create'
+                    toast.warn("Your previous appointment is already expired. You can create a new one.", { position: "top-right" });
+                    setAction('create');
+                } else {
+                    setAction('updateOrDelete');
+                    toast.success('Appointment found!', { position: "top-right" });
+                }
+            } else {
+                setAction('create');
+                toast.info('No appointment found. You can create a new one.', { position: "top-right" });
+            }
         } catch (error) {
             console.error(error);
+            toast.error('Error checking appointment.', { position: "top-right" });
         }
     };
+    
 
     const handleCreate = async () => {
         try {
@@ -25,11 +43,12 @@ const domain="https://appointment-backend-weld.vercel.app"
                 phone,
                 ...form,
             });
-            alert('Appointment created');
+            toast.success('Appointment created successfully!', { position: "top-right" });
             setData(null);
             setAction('');
         } catch (error) {
             console.error(error);
+            toast.error('Error creating appointment.', { position: "top-right" });
         }
     };
 
@@ -38,22 +57,24 @@ const domain="https://appointment-backend-weld.vercel.app"
             await axios.put(`${domain}/appointments/${phone}`, {
                 ...form,
             });
-            alert('Appointment updated');
+            toast.success('Appointment updated successfully!', { position: "top-right" });
             setData(null);
             setAction('');
         } catch (error) {
             console.error(error);
+            toast.error('Error updating appointment.', { position: "top-right" });
         }
     };
 
     const handleDelete = async () => {
         try {
             await axios.delete(`${domain}/appointments/${phone}`);
-            alert('Appointment deleted');
+            toast.success('Appointment deleted successfully!', { position: "top-right" });
             setData(null);
             setAction('');
         } catch (error) {
             console.error(error);
+            toast.error('Error deleting appointment.', { position: "top-right" });
         }
     };
 
@@ -61,6 +82,15 @@ const domain="https://appointment-backend-weld.vercel.app"
         <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
             <h1 className="text-3xl font-bold mb-6">Appointment System</h1>
             <div className="w-full max-w-md p-6 bg-white shadow-md rounded-lg">
+                {/* Added Image */}
+                <div className="mb-4">
+                    <img
+                        src="https://img.freepik.com/premium-photo/beautiful-young-woman-washes-hair-beauty-salon_1301-8130.jpg?w=900"
+                        alt="Beauty Salon"
+                        className="w-full h-auto rounded-md mb-4"
+                    />
+                </div>
+
                 <div className="mb-4">
                     <input
                         type="text"
@@ -99,10 +129,10 @@ const domain="https://appointment-backend-weld.vercel.app"
                             onChange={(e) => setForm({ ...form, time: e.target.value })}
                         >
                             <option value="">Select Time</option>
-                            <option value="10am">10am</option>
-                            <option value="1pm">1pm</option>
-                            <option value="3pm">3pm</option>
-                            <option value="5pm">5pm</option>
+                            <option value="10am">10 AM</option>
+                            <option value="1pm">1 AM</option>
+                            <option value="3pm">3 AM</option>
+                            <option value="5pm">5 AM</option>
                         </select>
                         <select
                             className="w-full p-2 border border-gray-300 rounded-md mb-2"
@@ -196,6 +226,7 @@ const domain="https://appointment-backend-weld.vercel.app"
                     </div>
                 )}
             </div>
+            <ToastContainer />
         </div>
     );
 };
