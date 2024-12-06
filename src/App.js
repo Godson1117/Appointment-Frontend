@@ -35,15 +35,18 @@ const App = () => {
             toast.error('Error checking appointment.', { position: "top-right" });
         }
     };
-    
+
 
     const handleCreate = async () => {
         try {
-            await axios.post(`${domain}/appointments`, {
+            let temp = await axios.post(`${domain}/appointments`, {
                 phone,
                 ...form,
             });
-            toast.success('Appointment created successfully!', { position: "top-right" });
+            if (temp.data.message)
+                toast.error(temp.data.message, { position: "top-right" });
+            else
+                toast.success('Appointment created successfully!', { position: "top-right" });
             setData(null);
             setAction('');
         } catch (error) {
@@ -54,10 +57,13 @@ const App = () => {
 
     const handleUpdate = async () => {
         try {
-            await axios.put(`${domain}/appointments/${phone}`, {
+            let temp = await axios.put(`${domain}/appointments/${phone}`, {
                 ...form,
             });
-            toast.success('Appointment updated successfully!', { position: "top-right" });
+            if(temp.data.message)
+                toast.error(temp.data.message, { position: "top-right" });
+            else
+                toast.success('Appointment updated successfully!', { position: "top-right" });
             setData(null);
             setAction('');
         } catch (error) {
@@ -123,19 +129,19 @@ const App = () => {
                             value={form.date}
                             onChange={(e) => setForm({ ...form, date: e.target.value })}
                         />
-                        <select
-                            className="w-full p-2 border border-gray-300 rounded-md mb-2"
+
+                        <input
+                            type="time"
+                            id="time"
                             value={form.time}
                             onChange={(e) => setForm({ ...form, time: e.target.value })}
-                        >
-                            <option value="">Select Time</option>
-                            <option value="10am">10 AM</option>
-                            <option value="1pm">1 AM</option>
-                            <option value="3pm">3 AM</option>
-                            <option value="5pm">5 AM</option>
-                        </select>
+                            required
+                            placeholder="Select Appointment Time"
+                            className="block w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+
                         <select
-                            className="w-full p-2 border border-gray-300 rounded-md mb-2"
+                            className="w-full p-2 border border-gray-300 rounded-md mb-2 mt-2"
                             value={form.service}
                             onChange={(e) => setForm({ ...form, service: e.target.value })}
                         >
@@ -166,7 +172,7 @@ const App = () => {
                         <p className="mb-2">Name: {data.appointment.name}</p>
                         <p className="mb-2">Date: {new Date(data.appointment.date).toLocaleDateString()}</p>
                         <p className="mb-2">Time: {data.appointment.time}</p>
-                        <p className="mb-2">Service: {data.appointment.service}</p>
+                        <p className="mb-2">Service: {(data.appointment.service)[0].toUpperCase() + data.appointment.service.slice(1)}</p>
                         <p className="mb-4">Special Requests: {data.appointment.specialRequests}</p>
 
                         <h2 className="text-xl font-semibold mb-4">Update Appointment</h2>
@@ -183,19 +189,19 @@ const App = () => {
                             value={form.date}
                             onChange={(e) => setForm({ ...form, date: e.target.value })}
                         />
-                        <select
-                            className="w-full p-2 border border-gray-300 rounded-md mb-2"
+
+                        <input
+                            type="time"
+                            id="time"
                             value={form.time}
                             onChange={(e) => setForm({ ...form, time: e.target.value })}
-                        >
-                            <option value="">Select Time</option>
-                            <option value="10am">10am</option>
-                            <option value="1pm">1pm</option>
-                            <option value="3pm">3pm</option>
-                            <option value="5pm">5pm</option>
-                        </select>
+                            required
+                            placeholder="Select Appointment Time"
+                            className="block w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+
                         <select
-                            className="w-full p-2 border border-gray-300 rounded-md mb-2"
+                            className="w-full p-2 border border-gray-300 rounded-md mb-2 mt-2"
                             value={form.service}
                             onChange={(e) => setForm({ ...form, service: e.target.value })}
                         >
